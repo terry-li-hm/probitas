@@ -6,15 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from probitas._types import Decision, RuleConfig, RuleKind, TestCase, ToolCall
-
-VALID_RULE_TYPES = {
-    "regex_block",
-    "regex_require",
-    "pii_detect",
-    "entitlement",
-    "budget",
-    "tool_allowlist",
-}
+from probitas.engine import _RULE_REGISTRY
 
 
 def _require_yaml() -> Any:
@@ -52,9 +44,9 @@ def _parse_rules(config: dict[str, Any]) -> list[RuleConfig]:
         rule_type = rule_data.get("type")
         if not rule_type:
             raise ValueError(f"Rule '{name}' missing 'type'")
-        if rule_type not in VALID_RULE_TYPES:
+        if rule_type not in _RULE_REGISTRY:
             raise ValueError(
-                f"Rule '{name}' has unknown type '{rule_type}'. Valid: {sorted(VALID_RULE_TYPES)}"
+                f"Rule '{name}' has unknown type '{rule_type}'. Valid: {sorted(_RULE_REGISTRY)}"
             )
         kind_str = rule_data.get("kind", "deterministic")
         try:

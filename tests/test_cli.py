@@ -6,7 +6,6 @@ from pathlib import Path
 
 from probitas.cli import main
 
-
 POLICY_YAML = """\
 rules:
   - name: block_sql_injection
@@ -88,7 +87,10 @@ class TestCliRun:
     def test_output_to_file(self, tmp_path):
         policy, tests_dir = _write_fixtures(tmp_path)
         out_file = tmp_path / "report.txt"
-        code = main(["run", "--config", str(policy), "--tests", str(tests_dir), "--output", str(out_file)])
+        code = main([
+            "run", "--config", str(policy),
+            "--tests", str(tests_dir), "--output", str(out_file),
+        ])
         assert code == 0
         assert out_file.exists()
         assert "probitas" in out_file.read_text()

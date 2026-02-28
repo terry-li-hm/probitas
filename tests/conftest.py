@@ -6,7 +6,6 @@ import pytest
 
 from probitas._types import Decision, RuleConfig, RuleKind, TestCase, ToolCall
 
-
 # ---------------------------------------------------------------------------
 # Tool calls
 # ---------------------------------------------------------------------------
@@ -24,7 +23,10 @@ def dangerous_query():
 
 @pytest.fixture
 def pii_call():
-    return ToolCall(name="send_email", args={"body": "Contact john@example.com or call +852 9123 4567"})
+    return ToolCall(
+        name="send_email",
+        args={"body": "Contact john@example.com or call +852 9123 4567"},
+    )
 
 
 @pytest.fixture
@@ -39,7 +41,11 @@ def admin_call():
 
 @pytest.fixture
 def expensive_call():
-    return ToolCall(name="gpt4_query", args={"prompt": "Summarize"}, metadata={"estimated_cost": 5.50})
+    return ToolCall(
+        name="gpt4_query",
+        args={"prompt": "Summarize"},
+        metadata={"estimated_cost": 5.50},
+    )
 
 
 @pytest.fixture

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import html
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -165,20 +166,21 @@ def _render_jinja2(data: dict[str, Any]) -> str:
 
 def _render_stdlib(data: dict[str, Any]) -> str:
     """Minimal HTML fallback without Jinja2."""
+    e = html.escape
     rows = ""
     for t in data["tests"]:
         status = "PASS" if t["passed"] else "FAIL"
         color = "#22c55e" if t["passed"] else "#ef4444"
         rows += (
-            f"<tr><td>{t['description']}</td><td>{t['expected']}</td>"
-            f"<td>{t['actual']}</td><td>{t['rule']}</td>"
+            f"<tr><td>{e(t['description'])}</td><td>{e(t['expected'])}</td>"
+            f"<td>{e(t['actual'])}</td><td>{e(t['rule'])}</td>"
             f'<td style="color:{color};font-weight:bold">{status}</td></tr>\n'
         )
 
     s = data["summary"]
     c = data["coverage"]
-    semantic = ", ".join(c["semantic_rules"]) if c["semantic_rules"] else "none"
-    not_exercised = ", ".join(c["rules_not_exercised"]) if c["rules_not_exercised"] else "none"
+    semantic = e(", ".join(c["semantic_rules"])) if c["semantic_rules"] else "none"
+    not_exercised = e(", ".join(c["rules_not_exercised"])) if c["rules_not_exercised"] else "none"
 
     return f"""<!DOCTYPE html>
 <html lang="en">

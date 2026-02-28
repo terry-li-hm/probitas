@@ -272,6 +272,7 @@ def run_tests(rules: list[RuleConfig], test_cases: list[TestCase]) -> list[TestR
                 actual_rule=actual_rule,
                 passed=passed,
                 reason=reason,
+                rules_evaluated=eval_result.rules_evaluated,
             )
         )
     return results

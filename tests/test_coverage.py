@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from probitas._types import (
-    CoverageReport,
     Decision,
     RuleConfig,
     RuleKind,
@@ -14,7 +13,11 @@ from probitas._types import (
 from probitas.coverage import calculate_coverage
 
 
-def _make_result(actual_rule: str | None, passed: bool = True) -> TestResult:
+def _make_result(
+    actual_rule: str | None,
+    passed: bool = True,
+    rules_evaluated: list[str] | None = None,
+) -> TestResult:
     return TestResult(
         test_case=TestCase(
             description="test",
@@ -25,6 +28,10 @@ def _make_result(actual_rule: str | None, passed: bool = True) -> TestResult:
         actual_rule=actual_rule,
         passed=passed,
         reason="",
+        rules_evaluated=(
+            rules_evaluated if rules_evaluated is not None
+            else ([actual_rule] if actual_rule else [])
+        ),
     )
 
 
@@ -60,7 +67,8 @@ class TestCoverageCalculation:
         rules = [
             RuleConfig(name="det", rule_type="regex_block", params={}, applies_to=["*"]),
             RuleConfig(
-                name="sem", rule_type="regex_block", params={}, applies_to=["*"], kind=RuleKind.SEMANTIC
+                name="sem", rule_type="regex_block", params={},
+                applies_to=["*"], kind=RuleKind.SEMANTIC
             ),
         ]
         results = [_make_result("det")]
@@ -72,7 +80,8 @@ class TestCoverageCalculation:
     def test_all_semantic_rules(self):
         rules = [
             RuleConfig(
-                name="s1", rule_type="regex_block", params={}, applies_to=["*"], kind=RuleKind.SEMANTIC
+                name="s1", rule_type="regex_block", params={},
+                applies_to=["*"], kind=RuleKind.SEMANTIC
             ),
         ]
         cov = calculate_coverage(rules, [])
@@ -80,11 +89,21 @@ class TestCoverageCalculation:
         assert cov.total_deterministic_rules == 0
         assert cov.semantic_rules == ["s1"]
 
-    def test_no_blocking_results(self):
+    def test_allow_result_still_counts_as_exercised(self):
         rules = [
             RuleConfig(name="r1", rule_type="regex_block", params={}, applies_to=["*"]),
         ]
-        results = [_make_result(None)]  # rule evaluated but didn't block
+        # Rule evaluated but ALLOWed — should still count as exercised
+        results = [_make_result(None, rules_evaluated=["r1"])]
+        cov = calculate_coverage(rules, results)
+        assert cov.coverage_pct == 100.0
+        assert cov.rules_exercised == ["r1"]
+
+    def test_no_rules_evaluated(self):
+        rules = [
+            RuleConfig(name="r1", rule_type="regex_block", params={}, applies_to=["*"]),
+        ]
+        results = [_make_result(None, rules_evaluated=[])]
         cov = calculate_coverage(rules, results)
         assert cov.coverage_pct == 0.0
         assert cov.rules_not_exercised == ["r1"]

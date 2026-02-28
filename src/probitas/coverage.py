@@ -9,11 +9,20 @@ def calculate_coverage(
     rules: list[RuleConfig],
     results: list[TestResult],
 ) -> CoverageReport:
-    """Calculate guardrail coverage from test results."""
+    """Calculate guardrail coverage from test results.
+
+    A rule is "exercised" if any test caused it to be evaluated —
+    whether it ALLOWed or BLOCKed. This uses the rules_evaluated
+    list from EvalResult, not just the blocking rule.
+    """
     deterministic = [r for r in rules if r.kind == RuleKind.DETERMINISTIC]
     semantic = [r for r in rules if r.kind == RuleKind.SEMANTIC]
     det_names = {r.name for r in deterministic}
-    exercised = {r.actual_rule for r in results if r.actual_rule}
+
+    exercised: set[str] = set()
+    for r in results:
+        exercised.update(r.rules_evaluated)
+
     covered = exercised & det_names
     not_covered = det_names - covered
     pct = (len(covered) / len(det_names) * 100) if det_names else 100.0

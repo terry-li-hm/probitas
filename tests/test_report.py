@@ -20,7 +20,10 @@ def _sample_results() -> tuple[list[TestResult], CoverageReport]:
         expected=Decision.BLOCK,
     )
     results = [
-        TestResult(test_case=tc_pass, actual=Decision.ALLOW, actual_rule=None, passed=True, reason="All rules passed"),
+        TestResult(
+            test_case=tc_pass, actual=Decision.ALLOW, actual_rule=None,
+            passed=True, reason="All rules passed",
+        ),
         TestResult(
             test_case=tc_fail, actual=Decision.ALLOW, actual_rule=None, passed=False,
             reason="Expected block, got allow",

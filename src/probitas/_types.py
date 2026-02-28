@@ -75,6 +75,7 @@ class TestResult:
     actual_rule: str | None
     passed: bool
     reason: str
+    rules_evaluated: list[str] = field(default_factory=list)
 
 
 @dataclass
