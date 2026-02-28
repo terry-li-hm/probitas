@@ -1,0 +1,32 @@
+tests:
+  - description: "Email in args should be blocked"
+    tool_call:
+      name: send_email
+      args:
+        body: "Contact john@example.com for details"
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: block
+    expected_rule: detect_pii
+
+  - description: "Credit card number should be blocked"
+    tool_call:
+      name: send_email
+      args:
+        body: "Card number is 4111 1111 1111 1111"
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: block
+    expected_rule: detect_pii
+
+  - description: "Clean text should be allowed"
+    tool_call:
+      name: send_email
+      args:
+        body: "The quarterly report is ready for review."
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: allow

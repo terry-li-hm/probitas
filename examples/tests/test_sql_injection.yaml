@@ -1,0 +1,32 @@
+tests:
+  - description: "Safe SELECT query should be allowed"
+    tool_call:
+      name: execute_sql
+      args:
+        query: "SELECT * FROM accounts WHERE id = 42"
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: allow
+
+  - description: "DROP TABLE should be blocked"
+    tool_call:
+      name: execute_sql
+      args:
+        query: "DROP TABLE users"
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: block
+    expected_rule: block_sql_injection
+
+  - description: "SQL comment injection should be blocked"
+    tool_call:
+      name: run_query
+      args:
+        query: "SELECT 1; -- malicious comment"
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: block
+    expected_rule: block_sql_injection

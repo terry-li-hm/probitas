@@ -1,0 +1,42 @@
+tests:
+  - description: "Analyst can search"
+    tool_call:
+      name: search
+      args:
+        q: "revenue Q4"
+      metadata:
+        role: analyst
+        estimated_cost: 0.01
+    expected: allow
+
+  - description: "Analyst cannot execute SQL"
+    tool_call:
+      name: execute_sql
+      args:
+        query: "SELECT 1"
+      metadata:
+        role: analyst
+        estimated_cost: 0.01
+    expected: block
+    expected_rule: tool_entitlement
+
+  - description: "Admin can do anything"
+    tool_call:
+      name: execute_sql
+      args:
+        query: "SELECT 1"
+      metadata:
+        role: admin
+        estimated_cost: 0.01
+    expected: allow
+
+  - description: "Unknown role is blocked"
+    tool_call:
+      name: search
+      args:
+        q: "test"
+      metadata:
+        role: intern
+        estimated_cost: 0.01
+    expected: block
+    expected_rule: tool_entitlement

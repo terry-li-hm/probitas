@@ -1,0 +1,65 @@
+# probitas example policy — frenum-compatible schema
+# Tests all 6 rule types plus semantic rules
+
+version: "1.0"
+policy_version: "1.0.0"
+
+rules:
+  # Block dangerous SQL patterns
+  - name: block_sql_injection
+    type: regex_block
+    applies_to: ["execute_sql", "run_query"]
+    params:
+      fields: ["query"]
+      patterns:
+        - "(?i)(DROP|DELETE|TRUNCATE)\\s+TABLE"
+        - "(?i);\\s*--"
+
+  # Require confirmation IDs on sensitive operations
+  - name: require_confirmation
+    type: regex_require
+    applies_to: ["transfer_funds"]
+    params:
+      fields: ["confirmation_id"]
+      pattern: "^CONF-[A-Z0-9]{8}$"
+
+  # Scan all tool outputs for PII
+  - name: detect_pii
+    type: pii_detect
+    applies_to: ["*"]
+    params:
+      detectors: [email, phone_intl, credit_card]
+      action: block
+
+  # Role-based tool access
+  - name: tool_entitlement
+    type: entitlement
+    applies_to: ["*"]
+    params:
+      roles:
+        analyst: ["search", "get_data", "summarize"]
+        admin: ["*"]
+      default: block
+
+  # Cost threshold
+  - name: cost_limit
+    type: budget
+    applies_to: ["*"]
+    params:
+      max_cost: 2.00
+
+  # Tool allowlist
+  - name: approved_tools
+    type: tool_allowlist
+    applies_to: ["*"]
+    params:
+      allowed_tools: ["search", "get_data", "summarize", "execute_sql", "run_query", "transfer_funds", "send_email"]
+
+  # Semantic rule — not testable deterministically
+  - name: response_tone_check
+    type: regex_block
+    kind: semantic
+    applies_to: ["*"]
+    params:
+      fields: []
+      patterns: []
