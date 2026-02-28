@@ -1,6 +1,6 @@
 """probitas — Guardrail regression testing for LLM agent tool calls."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from probitas._types import (
     CoverageReport,

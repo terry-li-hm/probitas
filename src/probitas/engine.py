@@ -10,6 +10,7 @@ from probitas._types import (
     Decision,
     EvalResult,
     RuleConfig,
+    RuleKind,
     RuleResult,
     TestCase,
     TestResult,
@@ -231,8 +232,8 @@ def evaluate(rules: list[RuleConfig], tool_call: ToolCall) -> EvalResult:
     """Evaluate all applicable deterministic rules. First BLOCK short-circuits."""
     evaluated: list[str] = []
     for rule in rules:
-        if rule.kind != Decision.ALLOW and rule.kind.value == "semantic":
-            continue  # skip semantic rules
+        if rule.kind == RuleKind.SEMANTIC:
+            continue
         if not _rule_applies(rule, tool_call):
             continue
         handler = get_handler(rule.rule_type)
